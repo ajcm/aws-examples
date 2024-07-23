@@ -1,0 +1,15 @@
+{
+  "dev": {
+    "awscloudformation": {
+      "AuthRoleName": "amplify-kitbogaamplifydev-dev-164551-authRole",
+      "UnauthRoleArn": "arn:aws:iam::042746780522:role/amplify-kitbogaamplifydev-dev-164551-unauthRole",
+      "AuthRoleArn": "arn:aws:iam::042746780522:role/amplify-kitbogaamplifydev-dev-164551-authRole",
+      "Region": "eu-west-1",
+      "DeploymentBucketName": "amplify-kitbogaamplifydev-dev-164551-deployment",
+      "UnauthRoleName": "amplify-kitbogaamplifydev-dev-164551-unauthRole",
+      "StackName": "amplify-kitbogaamplifydev-dev-164551",
+      "StackId": "arn:aws:cloudformation:eu-west-1:042746780522:stack/amplify-kitbogaamplifydev-dev-164551/cac078d0-d32b-11ee-a6bd-02d390414505",
+      "AmplifyAppId": "d3pq6l902ppzrt"
+    }
+  }
+}
