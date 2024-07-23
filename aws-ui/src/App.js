@@ -17,7 +17,6 @@ import './App.css';
 import Home from './pages/Home'
 
 //user
-import UserInfo from './pages/user/UserInfo'
 import S3Home  from './pages/aws/S3Home'
 import S3Load  from './pages/aws/S3Load'
 

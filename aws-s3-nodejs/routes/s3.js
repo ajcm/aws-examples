@@ -5,6 +5,14 @@ var AWS = require('aws-sdk');
 
 var s3 = new AWS.S3();
 
+//hello
+router.get('/', function(req, res, next) {
+  return res.status(200).json({
+    message: "hello",
+  });
+
+});
+
 /* GET home page. */
 router.get('/list', function(req, res, next) {
 

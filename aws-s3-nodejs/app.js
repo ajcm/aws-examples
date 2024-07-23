@@ -22,8 +22,10 @@ app.use(fileUpload());
 
 //Routes
 app.use('/', indexRouter);
-app.use('/config', configRouter);
-app.use('/s3', s3);
+app.use('//config', configRouter);
+app.use('/s3', indexRouter);
+
+//app.use('/s3', s3);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

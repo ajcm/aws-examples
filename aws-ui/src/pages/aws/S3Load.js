@@ -1,10 +1,9 @@
 import { useState, useEffect, createContext } from 'react';
 import { Grid, View, useTheme, TextField, Button, Flex } from '@aws-amplify/ui-react';
-import { getBackendUrl, getEcho, get } from '../../services/DebugService';
+import { get } from '../../services/HttpService';
 
 
 const Main = () => {
-  const [expression, setExpression] = useState(null);
   const [data, setData] = useState(null);
   const [url, setUrl] = useState("http://localhost:8080");
   const [error, setError] = useState(null);
@@ -54,7 +53,7 @@ const Main = () => {
       >
 
         <View
-          height="2rem"
+        //  height="2rem"
           width="35rem"
           backgroundColor=''
         >
@@ -95,11 +94,13 @@ const Main = () => {
         //    alignItems="stretch"
         alignContent="flex-start"
         //  wrap="nowrap"
-        gap="1rem"
+        gap="2rem"
+        padding={'1rem'}
+        border={'1px solid'}
       >
 
         <>
-          <pre>{url} </pre>
+          <pre>{data ? data : '-'} </pre>
         </>
 
 
