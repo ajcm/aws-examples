@@ -1,73 +1,10 @@
 import React from 'react';
 import { useState, useEffect, createContext } from 'react';
-import { Link, View, Text } from '@aws-amplify/ui-react';
+import { Link, View, Text, SelectField } from '@aws-amplify/ui-react';
+import { formatDate, humanFileSize, padTwoDigits } from '../../Utils'
 
-import S3Connection from '../../components/s3/S3Connection'
-import S3Bucket from '../../components/s3/S3Bucket'
-import {get,post} from '../../services/S3Service'
+import { get, post, listObjects } from '../../services/S3Service'
 
-
-/**
- * Format bytes as human-readable text.
- * 
- * @param bytes Number of bytes.
- * @param si True to use metric (SI) units, aka powers of 1000. False to use 
- *           binary (IEC), aka powers of 1024.
- * @param dp Number of decimal places to display.
- * 
- * @return Formatted string.
- */
-function humanFileSize(bytes, si=false, dp=1) {
-  const thresh = si ? 1000 : 1024;
-
-  if (Math.abs(bytes) < thresh) {
-    return bytes + ' B';
-  }
-
-  const units = si 
-    ? ['kB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'] 
-    : ['KiB', 'MiB', 'GiB', 'TiB', 'PiB', 'EiB', 'ZiB', 'YiB'];
-  let u = -1;
-  const r = 10**dp;
-
-  do {
-    bytes /= thresh;
-    ++u;
-  } while (Math.round(Math.abs(bytes) * r) / r >= thresh && u < units.length - 1);
-
-
-  return bytes.toFixed(dp) + ' ' + units[u];
-}
-
-function padTwoDigits(num) {
-  return num.toString().padStart(2, "0");
-}
-
-function formatDate(date,dateDiveder = "-") {
-  // :::: Exmple Usage ::::
-  // The function takes a Date object as a parameter and formats the date as YYYY-MM-DD hh:mm:ss.
-  // 👇️ 2023-04-11 16:21:23 (yyyy-mm-dd hh:mm:ss)
-  //console.log(dateInYyyyMmDdHhMmSs(new Date()));
-
-  //  👇️️ 2025-05-04 05:24:07 (yyyy-mm-dd hh:mm:ss)
-  // console.log(dateInYyyyMmDdHhMmSs(new Date('May 04, 2025 05:24:07')));
-  // Date divider
-  // 👇️ 01/04/2023 10:20:07 (MM/DD/YYYY hh:mm:ss)
-  // console.log(dateInYyyyMmDdHhMmSs(new Date(), "/"));
-  return (
-    [
-      date.getFullYear(),
-      padTwoDigits(date.getMonth() + 1),
-      padTwoDigits(date.getDate()),
-    ].join(dateDiveder) +
-    " " +
-    [
-      padTwoDigits(date.getHours()),
-      padTwoDigits(date.getMinutes()),
-      padTwoDigits(date.getSeconds()),
-    ].join(":")
-  );
-}
 
 const Page = () => {
 
@@ -77,6 +14,29 @@ const Page = () => {
   const [key, setKey] = useState(null);
   const [object, setObject] = useState(null);
   const [bucket, setBucket] = useState(null);
+  const [buckets, setBuckets] = useState(null);
+
+  const loadBuckets = async () => {
+    try {
+
+      if (url) {
+        try {
+          const data = await get('/s3/buckets');
+          console.log(data)
+          setData(data);
+        } catch (err) {
+          setError("error: " + err.message);
+          return;
+        }
+
+      }
+
+    } catch (err) {
+      setError(err);
+    }
+
+  }
+
 
 
   const load = async () => {
@@ -84,7 +44,7 @@ const Page = () => {
 
       if (url) {
         try {
-          const data = await get(url);
+          const data = null;// await listObjects(url);
           console.log(data)
           setData(data);
         } catch (err) {
@@ -112,15 +72,15 @@ const Page = () => {
       // make sure to catch any error
       .catch(console.error);
   }, [])
-  
-  
+
+
   const loadDetails = async (key) => {
     try {
       console.log(key)
       setKey(key)
       if (url) {
         try {
-          const object = await post('/s3/details',{'key':key});
+          const object = await post('/s3/details', { 'key': key });
           setObject(JSON.stringify(object, null, 4));
 
         } catch (err) {
@@ -139,22 +99,31 @@ const Page = () => {
   if (error) {
     return <span>Caught an error: {error.message}</span>;
   }
-  
+
   return (
     <View>
       <Text fontSize="1.4em" >List items </Text>
 
       <sub>Bucket: {data ? data.Name : '-'} </sub>
 
+      <SelectField
+        label="Bucket"        
+      >
+        <option value="apple">Apple</option>
+        <option value="banana">Banana</option>
+       
+      </SelectField>
+
       <ul>
 
-      {
-          data &&  data.Contents  ? data.Contents.map((item) => (
+        {
+          data && data.Contents ? data.Contents.map((item) => (
             <li key={item.Key}>
-         
-              <a href={'#'}   onClick={(e) => {
-                loadDetails(item.Key);    
-                e.preventDefault();}}> {item.Key}</a> - {formatDate(new Date(item.LastModified))} - {humanFileSize(item.Size)}
+
+              <a href={'#'} onClick={(e) => {
+                loadDetails(item.Key);
+                e.preventDefault();
+              }}> {item.Key}</a> - {formatDate(new Date(item.LastModified))} - {humanFileSize(item.Size)}
             </li>
           )) : <p> - No data </p>
         }
@@ -163,18 +132,18 @@ const Page = () => {
 
       <p>Details</p>
       <div>
-      <pre>
-        {key ? key : '-'}
-        
+        <pre>
+          {key ? key : '-'}
+
         </pre>
         <pre>
-        {object ? object : '-'}
+          {object ? object : '-'}
         </pre>
       </div>
 
 
-      
- 
+
+
 
     </View>
   );

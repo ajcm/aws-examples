@@ -85,7 +85,6 @@ router.post('/listObjectDetails', async (req, res, next) => {
       }
     }
 
-
     ok(res, { "items": items });
 
   } catch (err) {
