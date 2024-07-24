@@ -1,14 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { Button } from '@aws-amplify/ui-react';
-import { getBackendUrl, getEcho, get } from '../../services/S3Service';
+import {get} from '../services/HttpService';
 
-
-export const Home = () => {
+export const Home = ({url}) => {
+  
   const [data, setData] = useState(null);
 
   const load = async () => {
     try {
-      const data = await get('/s3/config/bucket');
+      const data = await get(url);
       setData(JSON.stringify(data, null, 4));
     } catch (err) {
       setData("error: " + err.message);

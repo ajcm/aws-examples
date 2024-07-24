@@ -5,14 +5,16 @@ var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 var cors = require('cors')
 var fileUpload = require('express-fileupload');
+
+//routes
 var indexRouter = require('./routes/index');
-var configRouter = require('./routes/config');
 var s3 = require('./routes/s3');
 
+// main code
 require('dotenv').config();
 
+// express app
 var app = express();
-
 app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
@@ -22,8 +24,8 @@ app.use(fileUpload());
 
 //Routes
 app.use('/', indexRouter);
-app.use('//config', configRouter);
-app.use('/s3', indexRouter);
+app.use('/config', s3);
+app.use('/s3', s3);
 
 //app.use('/s3', s3);
 

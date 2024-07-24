@@ -12,7 +12,10 @@ const NavBar = () => {
                   <Link to="/s3">S3</Link>
                </li>
                <li>
-                  <Link to="/s3-load">load</Link>
+                  <Link to="/s3-list">objects</Link>
+               </li>
+               <li>
+                  <Link to="/s3-load">http debug </Link>
                </li>
 
             </ul>

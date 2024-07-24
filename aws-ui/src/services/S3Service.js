@@ -23,9 +23,10 @@ export const get = async (url,request) => {
 }
 
 
+
 export const post = async (url,request) => {
     const  response = await axios.post(
-        httpUrl,
+        httpUrl + url,
         request,
         {
             headers: {

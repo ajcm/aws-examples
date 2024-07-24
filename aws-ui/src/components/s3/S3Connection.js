@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Button } from '@aws-amplify/ui-react';
-import { getBackendUrl, getEcho, get } from '../../services/DebugService';
+import { getBackendUrl, getEcho, get } from '../../services/S3Service';
 
 export const Home = () => {
 

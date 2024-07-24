@@ -19,6 +19,7 @@ import Home from './pages/Home'
 //user
 import S3Home  from './pages/aws/S3Home'
 import S3Load  from './pages/aws/S3Load'
+import S3List  from './pages/aws/S3List'
 
 function App() {
 
@@ -32,7 +33,7 @@ function App() {
           <Route path="" element={<MainGrid><Home /></MainGrid>} />
           <Route path="/s3" element={<MainGrid><S3Home /></MainGrid>} />
           <Route path="/s3-load" element={<MainGrid><S3Load /></MainGrid>} />
-
+          <Route path="/s3-list" element={<MainGrid><S3List /></MainGrid>} />
 
           {/* <Route path="/messages" element={<MainGrid><Messages /> </MainGrid>} />
           <Route path="/memos" element={<MainGrid><Memos /> </MainGrid>} />
