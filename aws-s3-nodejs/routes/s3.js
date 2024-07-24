@@ -1,110 +1,128 @@
 var express = require('express');
 var router = express.Router();
+var { getObject, listObjects } = require('../services/asyncServices')
+
 var AWS = require('aws-sdk');
+var s3 = new AWS.S3({ apiVersion: "2006-03-01" });
 
-var s3 = new AWS.S3();
-
-//hello
-router.get('/', function(req, res, next) {
+// Ok
+router.get('/', function (req, res, next) {
   return res.status(200).json({
-    message: "hello",
+    message: "Ok",
   });
 
 });
 
 
-// bucket info 
-router.get('/bucket', function(req, res, next) {
+// Configured bucket
+router.get('/bucket', (req, res, next) => {
 
-  var bucketParams = { 
-    Bucket: process.env.S3_BUCKET 
-  };   
-
-  s3 = new AWS.S3({ apiVersion: "2006-03-01" });
-  s3.headBucket(bucketParams, function (err, data) {
-    if (err) {
-      console.log("Error", err);
-    } else if (data) {
-  
-      res.status(200).json({
-        "bucket":  process.env.S3_BUCKET,
-        "headBucket": data
-      });
-    }
-  });
-  
-  });
-
-
-router.get('/list', function(req, res, next) {
-
-  var bucketParams = { 
-    Bucket: process.env.S3_BUCKET ,
-     //"Prefix": "xpto/",
-     //"Delimiter": "/"
+  var bucketParams = {
+    Bucket: process.env.S3_BUCKET
   };
-   
-   try {
-    s3.listObjects(bucketParams, function (err, data) {
-      if (err) {
-        console.log("Error", err);
-      } else if (data) {
-        res.status(200).json(data);
-      }
-   });
 
-  }catch(err){
-    console.log(err)
-
-  }
+  s3.headBucket(bucketParams, function (err, data) {
+    handleResponse(err, data, res);
+  });
 
 });
 
+// Buckets
+router.get('/buckets', function (req, res, next) {
+  s3.listBuckets(bucketParams, (err, data) => {
+    handleResponse(err, data, res);
+  });
+});
 
-router.post('/details', function(req, res, next) {
 
+//List objects
+router.post('/listObjects', async (req, res, next) => {
   const requestBody = req.body;
 
-  var bucketParams = { 
-    Bucket: process.env.S3_BUCKET ,
-    Key: requestBody.key
-     //"Delimiter": "/"
-  };
-   
-   try {
-    s3.headObject(bucketParams, function (err, data) {
-      if (err) {
-        console.log("Error", err);
-        res.status(err.statusCode).json(err);
-      } else if (data) {
-        res.status(200).json(data);
-      }
-   });
+  const bucket = requestBody.bucket;
+  const prefix = requestBody.prefix;
+  const delimiter = requestBody.delimiter;
 
-  }catch(err){
-    console.log(err)
+  try {
+    var data = await listObjects(bucket, prefix, delimiter);
+    ok(res, data);
 
+  } catch (err) {
+    handleError(err, res);
   }
+});
 
+
+//List objects
+router.post('/listObjectDetails', async (req, res, next) => {
+  const requestBody = req.body;
+
+  const bucket = requestBody.bucket;
+  const prefix = requestBody.prefix;
+  const delimiter = requestBody.delimiter;
+
+  try {
+
+    var items = [];
+    var data = await listObjects(bucket, prefix, delimiter);
+
+    if (data && data.Contents) {
+      for (const item of data.Contents) {
+
+        try {
+          var details = await getObject(bucket, item.Key);
+        } catch (err) {
+          console.log(err);
+          break;
+        }
+
+        if (details && details.ContentType) {
+          const isfolder = details.ContentType.startsWith('application/x-directory');
+          item['ContentType'] = details.ContentType;
+          item['isfolder'] = isfolder;
+          items.push(item);
+        }
+      }
+    }
+
+
+    ok(res, { "items": items });
+
+  } catch (err) {
+    handleError(err, res);
+  }
+});
+
+
+//objectDetails
+router.post('/objectDetails', async function (req, res, next) {
+  const requestBody = req.body;
+  const bucket = requestBody.bucket;
+  const key = requestBody.key;
+
+  try {
+    var details = await getObject(bucket, key);
+    res.status(200).json(details)
+
+  } catch (err) {
+    console.log(err);
+    handleError(err, res);
+  }
 });
 
 
 router.post('/upload', (req, res) => {
-  // Log the files to the console
-//  console.log(Object.entries( req.files));
-
-  var files = Object.entries( req.files)
+  var files = Object.entries(req.files)
 
   files.forEach((ff, index) => {
-   // console.log(`Current index: ${index}`);
- //   console.log(ff[1]);
+
     var file = ff[1]
     uploadFile(file.name, file.data)
   });
 
 
 
- // var {file } =  req.files;
+  // var {file } =  req.files;
 
 
   //console.log(file)
@@ -131,7 +149,7 @@ router.post('/upload', (req, res) => {
 });
 
 
-const uploadFile = (key,data) => {
+const uploadFile = (key, data) => {
   const params = {
     Bucket: process.env.S3_BUCKET,
     Key: key,
@@ -147,4 +165,33 @@ const uploadFile = (key,data) => {
   });
 }
 
+
+// aux 
+
+function handleResponse(err, data, res) {
+  if (err) {
+    console.log("Error", err);
+    if (err && err.statusCode) {
+      res.status(err.statusCode).json(err);
+    } else {
+      res.status(503).json(err);
+    }
+
+  } else if (data) {
+    res.status(200).json(data);
+  }
+}
+
+function handleError(err, res) {
+  console.log("Error", err);
+  if (err && err.statusCode) {
+    res.status(err.statusCode).json(err);
+  } else {
+    res.status(503).json(err);
+  }
+}
+
+function ok(res, data) {
+  res.status(200).json(data);
+}
 module.exports = router;

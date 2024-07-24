@@ -59,19 +59,3 @@ export const getEcho = async (request) => {
 }
 
 
-
-export const getUserId = async (request) => {
-    const  response = await axios.post(
-        httpUrl,
-        request,
-        {
-            headers: {
-                "Cache-Control": "no-cache",
-                "Access-Control-Allow-Origin": "*",
-            }
-        }
-    )
-     
-
-    return response.data
-}

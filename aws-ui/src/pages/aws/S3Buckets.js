@@ -76,7 +76,6 @@ const Page = () => {
   const [error, setError] = useState(null);
   const [key, setKey] = useState(null);
   const [object, setObject] = useState(null);
-  const [bucket, setBucket] = useState(null);
 
 
   const load = async () => {
@@ -84,7 +83,7 @@ const Page = () => {
 
       if (url) {
         try {
-          const data = await get(url);
+          const data = await get('/s3/buckets');
           console.log(data)
           setData(data);
         } catch (err) {
@@ -142,19 +141,17 @@ const Page = () => {
   
   return (
     <View>
-      <Text fontSize="1.4em" >List items </Text>
-
-      <sub>Bucket: {data ? data.Name : '-'} </sub>
+      <Text fontSize="1.4em" >Buckets </Text>
 
       <ul>
 
       {
-          data &&  data.Contents  ? data.Contents.map((item) => (
+          data &&  data.Buckets  ? data.Buckets.map((item) => (
             <li key={item.Key}>
          
               <a href={'#'}   onClick={(e) => {
                 loadDetails(item.Key);    
-                e.preventDefault();}}> {item.Key}</a> - {formatDate(new Date(item.LastModified))} - {humanFileSize(item.Size)}
+                e.preventDefault();}}> {item.Name}</a> - {formatDate(new Date(item.CreationDate))}
             </li>
           )) : <p> - No data </p>
         }
