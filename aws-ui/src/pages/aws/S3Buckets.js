@@ -37,13 +37,11 @@ const Page = () => {
   return (
     <View>
       <Text fontSize="1.4em" >Buckets </Text>
-
       <ul>
         {
           buckets ? buckets.map((item) => (
             <li key={item.Key}>
-
-               {item.Name} - {formatDate(new Date(item.CreationDate))}
+              {item.Name} - {formatDate(new Date(item.CreationDate))}
             </li>
           )) : <p> - No data </p>
         }

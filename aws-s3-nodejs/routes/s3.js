@@ -75,7 +75,9 @@ router.post('/listObjectDetails', async (req, res, next) => {
 
   try {
 
-    var items = [];
+    var response = {};
+    var objects = [];
+    var folders = [];
     var data = await listObjects(bucket, prefix, delimiter);
 
     if (data && data.Contents) {
@@ -92,12 +94,26 @@ router.post('/listObjectDetails', async (req, res, next) => {
           const isfolder = details.ContentType.startsWith('application/x-directory');
           item['ContentType'] = details.ContentType;
           item['isfolder'] = isfolder;
-          items.push(item);
+          objects.push(item);
         }
       }
     }
 
-    ok(res, { "items": items });
+    var hasfolders = false;
+    //CommonPrefixes
+    if (data && data.CommonPrefixes) {
+      for (const item of data.CommonPrefixes) {
+        folders.push(item.Prefix);  
+        hasfolders = true;   
+      }
+
+    }
+
+    response['objects'] = objects;
+    response['folders'] = folders;
+    response['hasfolders'] = hasfolders;
+
+    ok(res, response);
 
   } catch (err) {
     handleError(err, res);

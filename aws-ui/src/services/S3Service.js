@@ -13,15 +13,9 @@ export const listObjects = async (bucket, prefix, delimiter) => {
         delimiter: delimiter,
     };
 
-    const response = await post(httpUrl + "/s3/listObjectDetails",
-        request,
-        {
-            headers: {
-                "Cache-Control": "no-cache",
-                "Access-Control-Allow-Origin": "*",
-            }
-        }
-    )
+
+    const response = await post( "/s3/listObjectDetails",
+        request)
 
     return response
 }
@@ -48,7 +42,7 @@ export const get = async (url, request) => {
 
 export const post = async (url, request) => {
     const response = await axios.post(
-        httpUrl + url,
+        httpUrl +  url,
         request,
         {
             headers: {
