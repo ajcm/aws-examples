@@ -14,7 +14,7 @@ router.get('/', function (req, res, next) {
 });
 
 
-// Configured bucket
+// pre configured bucket
 router.get('/bucket', (req, res, next) => {
 
   var bucketParams = {
@@ -22,6 +22,11 @@ router.get('/bucket', (req, res, next) => {
   };
 
   s3.headBucket(bucketParams, function (err, data) {
+
+    if (!err && data){
+      data['Bucket'] = process.env.S3_BUCKET
+    }
+
     handleResponse(err, data, res);
   });
 
@@ -29,8 +34,15 @@ router.get('/bucket', (req, res, next) => {
 
 // Buckets
 router.get('/buckets', function (req, res, next) {
-  s3.listBuckets(bucketParams, (err, data) => {
-    handleResponse(err, data, res);
+  s3.listBuckets({}, (err, data) => {
+
+    var buckets = null;
+
+    if (!err && data && data.Buckets){
+      buckets = data.Buckets
+    }
+
+    handleResponse(err, buckets, res);
   });
 });
 
