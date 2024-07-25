@@ -78,7 +78,7 @@ const Page = () => {
 
     fetchData()
       .catch(console.error);
-  }, [bucket, delimiter])
+  }, [bucket, delimiter, prefix])
 
 
   const loadDetails = async (key) => {
@@ -123,27 +123,38 @@ const Page = () => {
         }
       </SelectField>
 
-      <pre>bucket: {bucket ? bucket : ''} </pre>
-      <pre>prefix: {prefix ? prefix : ''} </pre>
-      <pre> <a href='#' onClick={(e) => {
-        if (delimiter) {
-          setDelimiter(null)
-        } else {
-          setDelimiter('/')
-        }
-        e.preventDefault();
-      }}>{delimiter ? "Show all" : "Show folders"}</a> (delimiter: {delimiter ? delimiter : ''})
+      <p>
+        <sub>bucket: {bucket ? bucket : ''} </sub>
+        &#9643;
+        <sub><a href='#' onClick={(e) => {
+          setPrefix('')
+          e.preventDefault();
+        }}>Clear</a> (prefix: {prefix})
+        </sub>
+        &#9643;
+        <sub><a href='#' onClick={(e) => {
+          if (delimiter) {
+            setDelimiter(null)
+          } else {
+            setDelimiter('/')
+          }
+          e.preventDefault();
+        }}>{delimiter ? "Show all" : "Show folders"}</a> (delimiter: {delimiter ? delimiter : ''})
+        </sub>
 
-      </pre>
+      </p>
 
-      <p>Objects</p>
+      <h4>Objects</h4>
       <ul>
         {
           objects ? objects.map((item) => (
             <li key={item.Key}>
 
               {item.isfolder ?
-                <img width="15px" src="/folder.png"></img>
+                <img width="15px" src="/folder.png" onClick={(e) => {
+                  setPrefix(item.Key);
+                  e.preventDefault();
+                }}></img>
                 : <></>
               }
               <a href={'#'} onClick={(e) => {
@@ -151,24 +162,48 @@ const Page = () => {
                 e.preventDefault();
               }}> {item.Key}</a> - {formatDate(new Date(item.LastModified))} - {humanFileSize(item.Size)}
             </li>
-          )) : <> </>
+          )) : <p> no objects  </p>
         }
       </ul>
 
-      {folders && folders.length > 0 ?
+      {folders ?
         <>
-          <p>Folders</p>
+          <h4>Folders</h4>
+          <sub>{prefix}
+
+
+            {prefix !== '' ?
+
+              <>
+                <a href="#" onClick={(e) => {
+
+                  var count = prefix.split("/").length - 1;
+                  if (count < 2) {
+                    setPrefix('')
+                  } else {
+                    var pp = prefix.slice(0, -1)
+                    var newPrefix = pp.substring(0, pp.lastIndexOf('/'))
+                    setPrefix(newPrefix+ '/');
+                  }
+                  e.preventDefault();
+                }}>    *** back  </a>
+
+              </> : <></>
+            }
+          </sub>
+
           <ul>
+
             {
-              folders ? folders.map((item) => (
+              folders.length > 0 ? folders.map((item) => (
                 <li key={item}>
 
-                  <a href={'#'} onClick={(e) => {
-
+                  <img width="15px" src="/folder.png" onClick={(e) => {
+                    setPrefix(item);
                     e.preventDefault();
-                  }}> {item}</a>
+                  }}></img> {item}
                 </li>
-              )) : <> </>
+              )) : <p> no folders  </p>
             }
 
           </ul>
