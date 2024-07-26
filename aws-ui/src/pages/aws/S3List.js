@@ -5,22 +5,21 @@ import { formatDate, humanFileSize, padTwoDigits } from '../../Utils'
 
 import { get, post, listObjects } from '../../services/S3Service'
 
+import S3ObjectDetails from '../aws/components/S3ObjectDetails'
+
 
 const Page = () => {
-
   const [error, setError] = useState(null);
-  const [key, setKey] = useState(null);
-  const [object, setObject] = useState(null);
 
+  const [objectKey, setObjectKey] = useState(null);
   const [objects, setObjects] = useState(null);
+
   const [folders, setFolders] = useState(null);
 
   const [bucket, setBucket] = useState(null);
   const [prefix, setPrefix] = useState('');
   const [delimiter, setDelimiter] = useState('/');
-
   const [buckets, setBuckets] = useState(null);
-
 
 
   const loadBuckets = async () => {
@@ -41,7 +40,6 @@ const Page = () => {
     }
 
     try {
-
       console.log("bucket: " + bucket)
 
       const data = await listObjects(bucket, prefix, delimiter);
@@ -60,20 +58,6 @@ const Page = () => {
   }
 
 
-  const loadObjectDetails = async (key) => {
-    if (key) {
-      try {
-        const object = await post('/s3/objectDetails', { 'key': key, 'bucket': bucket });
-        setObject(JSON.stringify(object, null, 4));
-
-      } catch (err) {
-        setError("error: " + err.message);
-        return;
-      }
-
-    }
-
-  }
 
 
   //effects
@@ -97,14 +81,14 @@ const Page = () => {
   }, [bucket, delimiter, prefix])
 
 
-  useEffect(() => {
-    const fetchData = async () => {
-      loadObjectDetails(key)
-    }
+  // useEffect(() => {
+  //   const fetchData = async () => {
+  //     loadObjectDetails(objectKey)
+  //   }
 
-    fetchData()
-      .catch(console.error);
-  }, [key])
+  //   fetchData()
+  //     .catch(console.error);
+  // }, [objectKey])
 
 
   if (error) {
@@ -115,7 +99,11 @@ const Page = () => {
     <View>
       <Text fontSize="1.4em" >List items </Text>
 
-      <SelectField onChange={(e) => { setBucket(e.target.value) }}>
+      <SelectField onChange={(e) => {
+        setBucket(e.target.value)
+        setPrefix(null)
+        setObjectKey(null)
+      }}>
 
         <option value=""> - </option>
         {
@@ -162,7 +150,7 @@ const Page = () => {
                 : <></>
               }
               <a href={'#'} onClick={(e) => {
-                setKey(item.Key);
+                setObjectKey(item.Key);
                 e.preventDefault();
               }}> {item.Key}</a> - {formatDate(new Date(item.LastModified))} - {humanFileSize(item.Size)}
             </li>
@@ -172,14 +160,15 @@ const Page = () => {
 
       {folders ?
         <>
-          <h4>Folders</h4>
           <sub>{prefix}
-
-
             {prefix !== '' ?
 
               <>
                 <a href="#" onClick={(e) => {
+
+                  if(!prefix){
+                    return;
+                  }
 
                   var count = prefix.split("/").length - 1;
                   if (count < 2) {
@@ -215,20 +204,15 @@ const Page = () => {
 
         : <></>
       }
-      <p>Details</p>
-      <div>
+
+      {/* <div>
         <pre>
-          {key ? key : '-'}
-
+          object: {objectKey ? objectKey : '-'}
         </pre>
-        <pre>
-          {object ? object : '-'}
-        </pre>
-      </div>
 
+      </div> */}
 
-
-
+      {objectKey ? <S3ObjectDetails objectKey={objectKey} bucket={bucket}></S3ObjectDetails> : <></>}
 
     </View>
   );
