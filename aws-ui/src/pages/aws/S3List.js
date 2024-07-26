@@ -59,10 +59,27 @@ const Page = () => {
     }
   }
 
+
+  const loadObjectDetails = async (key) => {
+    if (key) {
+      try {
+        const object = await post('/s3/objectDetails', { 'key': key, 'bucket': bucket });
+        setObject(JSON.stringify(object, null, 4));
+
+      } catch (err) {
+        setError("error: " + err.message);
+        return;
+      }
+
+    }
+
+  }
+
+
+  //effects
   useEffect(() => {
     const fetchData = async () => {
       loadBuckets()
-
     }
 
     fetchData()
@@ -71,7 +88,6 @@ const Page = () => {
 
 
   useEffect(() => {
-
     const fetchData = async () => {
       listBuckets()
     }
@@ -81,27 +97,15 @@ const Page = () => {
   }, [bucket, delimiter, prefix])
 
 
-  const loadDetails = async (key) => {
-    // try {
-    //   console.log(key)
-    //   setKey(key)
-    //   if (url) {
-    //     try {
-    //       const object = await post('/s3/details', { 'key': key });
-    //       setObject(JSON.stringify(object, null, 4));
+  useEffect(() => {
+    const fetchData = async () => {
+      loadObjectDetails(key)
+    }
 
-    //     } catch (err) {
-    //       setError("error: " + err.message);
-    //       return;
-    //     }
+    fetchData()
+      .catch(console.error);
+  }, [key])
 
-    //   }
-
-    // } catch (err) {
-    //   setError(err);
-    // }
-
-  }
 
   if (error) {
     return <span>Caught an error: {error.message ? error.message : error}</span>;
@@ -158,7 +162,7 @@ const Page = () => {
                 : <></>
               }
               <a href={'#'} onClick={(e) => {
-                loadDetails(item.Key);
+                setKey(item.Key);
                 e.preventDefault();
               }}> {item.Key}</a> - {formatDate(new Date(item.LastModified))} - {humanFileSize(item.Size)}
             </li>
@@ -183,7 +187,7 @@ const Page = () => {
                   } else {
                     var pp = prefix.slice(0, -1)
                     var newPrefix = pp.substring(0, pp.lastIndexOf('/'))
-                    setPrefix(newPrefix+ '/');
+                    setPrefix(newPrefix + '/');
                   }
                   e.preventDefault();
                 }}>    *** back  </a>

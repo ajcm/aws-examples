@@ -33,8 +33,6 @@ export const get = async (url, request) => {
             }
         }
     )
-
-
     return response.data
 }
 
@@ -51,7 +49,6 @@ export const post = async (url, request) => {
             }
         }
     )
-
 
     return response.data
 }
