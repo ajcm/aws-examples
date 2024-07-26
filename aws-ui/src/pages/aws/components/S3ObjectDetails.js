@@ -7,11 +7,16 @@ export const Home = ({objectKey,bucket}) => {
   const [objectDetails, setObjectDetails] = useState(null);
   const [error, setError] = useState(null);
 
+  const [signedUrl, setSignedUrl] = useState(null);
+
   const loadObjectDetails = async (key,bucket) => {
     if (objectKey) {
       try {
         const object = await post('/s3/objectDetails', { 'key': key, 'bucket': bucket });
         setObjectDetails(JSON.stringify(object, null, 4));
+
+        const url  = await post('/s3/objectSignedUrl', { 'key': key, 'bucket': bucket });
+        setSignedUrl(url)
 
       } catch (err) {
         setError("error: " + err.message);
@@ -19,7 +24,6 @@ export const Home = ({objectKey,bucket}) => {
       }
     }
   }
-
 
   useEffect(() => {
     (async () => {
@@ -43,7 +47,9 @@ export const Home = ({objectKey,bucket}) => {
         Object: {objectKey ? objectKey : '-'}
         {objectDetails ? objectDetails : '-'}
       </pre>
-      <a href={"http://" + bucket+".s3.amazonaws.com/" +objectKey}> Link</a>
+      <a  target="_blank"  href={"http://" + bucket+".s3.amazonaws.com/" +objectKey}> Link</a>
+
+      {signedUrl ? <a target="_blank"   href={signedUrl}> Signed Url</a> : <></> }
     </div>
   );
 };

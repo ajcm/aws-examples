@@ -3,7 +3,8 @@ var router = express.Router();
 var { getObject, listObjects } = require('../services/asyncServices')
 
 var AWS = require('aws-sdk');
-var s3 = new AWS.S3({ apiVersion: "2006-03-01" });
+//AWS.config.update({region: 'eu-west-3'});
+var s3 = new AWS.S3({ apiVersion: "2006-03-01"});
 
 // Ok
 router.get('/', function (req, res, next) {
@@ -129,7 +130,30 @@ router.post('/objectDetails', async function (req, res, next) {
 
   try {
     var details = await getObject(bucket, key);
-    res.status(200).json(details)
+   // res.status(200).json(details)
+    
+    ok(res, details);
+
+  } catch (err) {
+    console.log(err);
+    handleError(err, res);
+  }
+});
+
+
+//objectDetails
+router.post('/objectSignedUrl', async function (req, res, next) {
+  const requestBody = req.body;
+  const bucket = requestBody.bucket;
+  const key = requestBody.key;
+  const region = requestBody.region;
+
+  try {
+    var params = {Bucket: bucket, Key: key};
+    var s3 = new AWS.S3({ apiVersion: "2006-03-01",region: region });
+    var url = s3.getSignedUrl('getObject', params);
+    console.log('The URL is', url);
+    ok(res, url);
 
   } catch (err) {
     console.log(err);
